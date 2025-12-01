@@ -19,18 +19,23 @@ const syncUserCreation=inngest.createFunction(
     }
 )
 ///Inngest user Deletion
-const syncUserDeletion=inngest.createFunction(
-    {id:'delete-user-with-clerk'},
-    {event:'clerk/user.deleted'},
-    async({event})=>{
-        const {data}=event
-        await prisma.user.delete({
-            where:{
-            id:data.id,
-           
-        }})
-    }
-)
+const syncUserDeletion = inngest.createFunction(
+  { id: "delete-user-with-clerk" },
+  { event: "clerk/user.deleted" },
+  async ({ event }) => {
+    console.log("DELETION EVENT RECEIVED:", event);
+
+    const userId =
+      event?.data?.id || event?.user_id || event?.data?.user_id;
+
+    console.log("USER ID TO DELETE:", userId);
+
+    await prisma.user.deleteMany({
+      where: { id: userId },
+    });
+  }
+);
+
 //sync user updation 
 const syncUserUpdation=inngest.createFunction(
     {id:'update-user-from-clerk'},
